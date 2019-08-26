@@ -8,9 +8,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 curl -s -f https://api.github.com/repos/espressif/arduino-esp32/releases > "$TMP/releases.json"
-zip="$(jq -r '.[]|select(.prerelease|not).assets[].browser_download_url' < "$TMP/releases.json" | grep zip | head -1)"
-
-curl -L -s -f "$zip" > "$TMP/release.zip"
-
-unzip -j "$TMP/release.zip"
-
+tag="$(jq -r 'map(select(.prerelease|not))[0].tag_name' < "$TMP/releases.json")"
+curl -L -s -f "https://github.com/espressif/arduino-esp32/releases/download/${tag}/esp32-${tag}.zip" > "$TMP/release.zip"
+unzip "$TMP/release.zip"
+mv "esp-${tag}" "esp32"
